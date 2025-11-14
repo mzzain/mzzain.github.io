@@ -1,0 +1,1586 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<title> VISA ON ARRIVAL</title>
+<style>
+   @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+  :root{
+    /* ubah ke "58mm" atau "80mm" sesuai printer */
+    --paper-width: 58mm;
+    --font-size: 12px;
+    --title-font-size: 28px;
+  }
+
+  /* area layar (preview) */
+  body {
+    display: flex;
+    font-family: "Inter", sans-serif;
+    padding: 20px;
+    background:#f4f4f4;
+    color:#111;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+
+  /* receipt container tampil di layar, ukuran nyata sesuai mm */
+  .receipt-wrap {
+    width: 450px;
+    max-width: 100%;
+    margin: 0 auto;
+    background: #fff;
+    padding: 8px 10px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+    border-radius:6px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .receipt {
+    width: 100%;
+    font-size: var(--font-size);
+    line-height: 1;
+    color: #000;
+
+}
+
+
+  .logo {
+    width: 48px;
+    height: 48px;
+    object-fit:contain;
+    margin: 0 auto 4px;
+    display:block;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: var(--title-font-size);
+    letter-spacing: 0.5px;
+  }
+  .meta { font-size: 10px; color:#222; margin-top:4px; }
+
+  .line { border-top:1px dashed #0002; margin:6px 0; }
+
+  
+  /* Media print: hapus elemen yang tidak perlu, set ukuran nyata */
+  @media print {
+    body { background: #fff; padding:0; display: block ; height: 200mm; margin:0}
+    .form-select (display:none)
+    .row .col-sm-3 .form-select (display:none)
+    .controls { display:none; }
+    .receipt-wrap {
+      box-shadow:none;
+      border-radius:0;
+      margin:0;
+      padding:0;
+      width: var(--paper-width);
+      font-size: 10px;
+      display: block;
+    }
+    .form-control{
+      font-size: 10px;
+      height: 20px;
+      
+    }
+    #currency{
+      width: 140%;
+      display: block;
+      transform: translateX(-60px);
+      text-align: center;
+    }
+      #kurspilih{
+      width: 140%;
+      display: block;
+      transform: translateX(-30px);
+      text-align: center;
+    }
+    .receipt-wrap .receipt .form-select{
+    display: none;
+  
+    }
+    
+    .btn{display: none}
+    
+
+    /* Important: atur margin via print dialog, tapi pakai ini untuk fallback */
+    @page {
+      size: var(--paper-width) auto;
+      margin: 0mm;
+    }
+  }
+
+  /* Responsive preview smaller screens */
+  @media (max-width:480px) {
+    :root { --font-size: 11px; --title-font-size:13px; }
+  }
+
+  #edit{
+      position: fixed;
+        left: 0;
+        top : 65%;
+        background-color: pink;
+        border:none;
+        border-radius: 10px;
+        width: 110px;
+     }
+      table{
+        position: fixed;
+        left: 0;
+        top : 30%;
+        border : 2px solid black;
+        table-layout:fixed; 
+        border-collapse: collapse;
+        text-align: center;
+        visibility: hidden;
+        font-size: 12px;
+            
+      }
+      table th {
+        border : 1px solid black;
+      }
+      table tr td {
+        border : 1px solid black;
+        width: 50px;
+      }
+      table input{
+        border : none;
+        width: 50px;
+        text-align: center;
+      }
+</style>
+</head>
+<body>
+ <div class="kurs">
+<table id="kurs">
+ <thead>
+   <th style="height: 24px">Code</th>
+   <th style="height: 24px">Kurs</th>
+</thead>
+<tbody>
+  <tr>
+    <td>USD</td>
+    <td><input class="kursusd" id="kursusd" value="15152"> </td>
+    </tr>
+    <tr>
+    <td>SGD</td>
+    <td><input class="kurssgd" id="kurssgd" value="11364"> </td>
+    </tr>
+    <tr>
+    <td>HKD</td>
+    <td><input class="kurshkd" id="kurshkd" value="1786"> </td>
+   </tr>
+    <tr>
+    <td>EUR</td>
+    <td><input class="kurseur" id="kurseur" value="17857"> </td>
+    </tr>
+    <tr>
+    <td>JPY</td>
+    <td><input class="kursjpy" id="kursjpy" value="100"> </td>
+   </tr>
+    <tr>
+    <td>GBP</td>
+    <td><input class="kursgbp" id="kursgbp" value="20833"> </td>
+   </tr>
+    <tr>
+    <td>SAR</td>
+    <td><input class="kurssar" id="kurssar" value="3546"> </td>
+    </tr>
+    <tr>
+    <td>AUD</td>
+    <td><input class="kursaud" id="kursaud" value="9091"> </td>
+   </tr>
+    <tr>
+    <td>THB</td>
+    <td><input class="kursthb" id="kursthb" value="294"> </td>
+    </tr>
+    <tr>
+    <td>MYR</td>
+    <td><input class="kursmyr" id="kursmyr" value="3226"> </td>
+    </tr>
+    <tr>
+    <td>CNY</td>
+    <td><input class="kurscny" id="kurscny" value="1786"> </td>
+    </tr>
+    <td>IDR</td>
+    <td><input class="kursidr" id="kursidr" value="1"> </td>
+    </tr>
+</tbody>
+</table>
+<button id="edit">Edit Kurs</button>
+</div>
+
+
+<div class="receipt-wrap" id="receiptWrap">
+  <div class="receipt" id="receipt">
+ <h1 style="text-align:center">VISA ON ARRIVAL </h1>
+    <h2 style="text-align:center">Molina Lite</h2>
+    <br>
+    <br>
+ <form>
+<div class="row g-3">
+<div class="col-sm-3">
+    <select class="form-select Kurs mb-4">
+        <option value="usd">USD</option>
+        <option value="sgd">SGD</option>
+        <option value="hkd">HKD</option>
+        <option value="eur">EUR</option>
+        <option value="jpy">JPY</option>
+        <option value="gbp">GBP</option>
+        <option value="sar">SAR</option>
+        <option value="aud">AUD</option>
+        <option value="thb">THB</option>
+        <option value="myr">MYR</option>
+        <option value="cny">CNY</option>
+        <option value="idr">IDR</option>
+    </select>
+   </div>
+  
+   <div class="col-sm">
+    <input class="form-control mb-4" type="text" id="currency" value="US DOLLAR"  disabled readonly>
+    </div>
+    <div class="col-sm">
+    <input class="form-control mb-4" type="number" id="kurspilih" value="15152"  disabled readonly>
+    </div>
+    
+</div>
+
+        <div class="form-floating col-sm mb-3">
+        <input type="number" class="form-control orang" id="floatingInput" placeholder="Jumlah Pasangger">
+        <label for="floatingInput">Pasangger</label>
+        </div>
+        
+       <div class="row g-3">
+       <div class="form-floating col-sm mb-3">
+        <input type="text" class="form-control harga" id="harga" placeholder="Harga" disabled readonly>
+        <label for="floatingInput">Price</label>
+        </div>
+       
+        
+         <div class="form-floating col-sm mb-3">
+        <input type="text" class="form-control hargavalas" id="hargavalas" placeholder="Harga" disabled readonly>
+        <label for="floatingInput"></label>
+        </div>
+    </div>
+    
+     <div class="row g-2">
+       <div class="form-floating col-sm mb-3">
+        <input type="number" class="form-control bayar" id="bayar" placeholder="Payment">
+        <label for="floatingInput">Payment</label>
+        </div>
+
+        
+         <div class="form-floating col-sm mb-3">
+        <input type="text" class="form-control convert" id="convert" placeholder="Convertion" disabled readonly>
+        <label for="floatingInput">Convertion</label>
+        </div>
+    </div>
+      <div class="form-floating col-sm mb-3">
+        <input type="text" class="form-control convert" id="round" placeholder="Change" disabled readonly>
+        <label for="floatingInput">Pembulatan</label>
+        </div>
+         <div class="form-floating col-sm mb-3">
+        <input type="text" class="form-control convert" id="change" placeholder="Change" disabled readonly>
+        <label for="floatingInput">Change</label>
+        </div>
+      
+    </form>
+    <button type="button" class="btn btn-success" onclick="printReceipt()">Print</button>
+    
+   
+    </div>
+  </div>
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+      
+        
+    const kursSelect = document.querySelector(".Kurs");
+    const hargavalas = document.getElementById("hargavalas");
+    let Payment = document.getElementById("bayar");
+    const convert = document.getElementById("convert");
+    const kembalian=document.getElementById("change");
+    const kursusd = document.getElementById("kursusd");
+    const tablekurs= document.getElementById("kurs");
+    const matauang = document.getElementById("currency"); 
+    const kurspilih = document.getElementById("kurspilih"); 
+    const buttonedit = document.getElementById("edit");    
+     const bulat =document.getElementById("round");
+    
+        buttonedit.addEventListener("click", event => {
+           if (tablekurs.style.visibility === "hidden"){
+             tablekurs.style.visibility ="visible";
+             buttonedit.textContent ="Hide Kurs";
+           }
+           else {
+             tablekurs.style.visibility ="hidden";
+             buttonedit.textContent ="Edit Kurs";
+           }
+        });
+
+   
+          const harga = document.getElementById("harga");
+          const Pasangger =document.querySelector(".orang");
+
+          
+
+               function formatRp(angka) {
+                  const formatting = new Intl.NumberFormat("id-ID", {
+                  style : "currency",
+                  currency : "IDR",
+                  maximumFractionDigits : 0,
+              }
+              ).format(angka);
+              return formatting;
+              }
+
+            
+
+
+    kursSelect.addEventListener("change", function() {
+           if (kursSelect.value == "usd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursusd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "$ " + Math.round(Pasangger.value * 513500 / kursusd.value);
+        convert.value = formatkonversi;
+        matauang.value = "US DOLLAR";
+        kurspilih.value = kursusd.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+      }
+
+      else if (kursSelect.value == "sgd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurssgd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "S$ " + Math.round(Pasangger.value * 513500 / kurssgd.value);
+        convert.value = formatkonversi;
+        matauang.value = "SINGAPORE DOLLAR";
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "hkd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurshkd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "HK$ " + Math.round(Pasangger.value * 513500 / kurshkd.value);
+        convert.value = formatkonversi;
+        matauang.value = "HONGKONG DOLLAR";
+        kurspilih.value = kurshkd.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "eur") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurseur.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "€ " + Math.round(Pasangger.value * 513500 / kurseur.value);
+        convert.value = formatkonversi;
+        matauang.value = "EURO";
+        kurspilih.value = kurseur.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "jpy") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursjpy.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "¥ " + Math.round(Pasangger.value * 513500 / kursjpy.value);
+        convert.value = formatkonversi;
+        matauang.value = "JAPANESE YEN";
+        kurspilih.value = kursjpy.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "gbp") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursgbp.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "£ " + Math.round(Pasangger.value * 513500 / kursgbp.value);
+        convert.value = formatkonversi;
+        matauang.value = "POUNDSTERLING";
+        kurspilih.value = kursgbp.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "sar") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurssar.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "﷼ " + Math.round(Pasangger.value * 513500 / kurssar.value);
+        convert.value = formatkonversi;
+        matauang.value = "SAUDI RIYAL";
+        kurspilih.value = kurssar.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "aud") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursaud.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "A$ " + Math.round(Pasangger.value * 513500 / kursaud.value);
+        convert.value = formatkonversi;
+        matauang.value = "AUSTRALIAN DOLLAR";
+        kurspilih.value = kursaud.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "thb") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursthb.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+         const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "฿ " + Math.round(Pasangger.value * 513500 / kursthb.value);
+        convert.value = formatkonversi;
+        matauang.value = "THAILAND BATH";
+        kurspilih.value = kursthb.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+    
+      else if (kursSelect.value == "myr") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursmyr.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "RM " + Math.round(Pasangger.value * 513500 / kursmyr.value);
+        convert.value = formatkonversi;
+        matauang.value = "MALAYSIAN RINGGIT";
+        kurspilih.value = kursmyr.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "cny") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurscny.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "CN¥ " + Math.round(Pasangger.value * 513500 / kurscny.value);
+        convert.value = formatkonversi;
+        matauang.value = "CHINESE YUAN";
+        kurspilih.value = kurscny.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "idr") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursidr.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(Payment.value - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+       const changeround = formatRp(konversinumber -harganumber - pembulatan);
+  
+        
+        harga.value = formatharga;
+        hargavalas.value = "-";
+        matauang.value = "INDONESIA RUPIAH";
+        convert.value = " ";
+        kurspilih.value = kursidr.value;
+        bulat.value= pembulatan;
+        
+        
+       if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+      });  
+              
+    Pasangger.addEventListener("keyup", function() {
+           if (kursSelect.value == "usd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursusd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "$ " + Math.round(Pasangger.value * 513500 / kursusd.value);
+        convert.value = formatkonversi;
+        matauang.value = "US DOLLAR";
+        kurspilih.value = kursusd.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+      }
+
+      else if (kursSelect.value == "sgd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurssgd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "S$ " + Math.round(Pasangger.value * 513500 / kurssgd.value);
+        convert.value = formatkonversi;
+        matauang.value = "SINGAPORE DOLLAR";
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "hkd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurshkd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "HK$ " + Math.round(Pasangger.value * 513500 / kurshkd.value);
+        convert.value = formatkonversi;
+        matauang.value = "HONGKONG DOLLAR";
+        kurspilih.value = kurshkd.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "eur") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurseur.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "€ " + Math.round(Pasangger.value * 513500 / kurseur.value);
+        convert.value = formatkonversi;
+        matauang.value = "EURO";
+        kurspilih.value = kurseur.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "jpy") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursjpy.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "¥ " + Math.round(Pasangger.value * 513500 / kursjpy.value);
+        convert.value = formatkonversi;
+        matauang.value = "JAPANESE YEN";
+        kurspilih.value = kursjpy.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "gbp") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursgbp.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "£ " + Math.round(Pasangger.value * 513500 / kursgbp.value);
+        convert.value = formatkonversi;
+        matauang.value = "POUNDSTERLING";
+        kurspilih.value = kursgbp.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "sar") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurssar.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "﷼ " + Math.round(Pasangger.value * 513500 / kurssar.value);
+        convert.value = formatkonversi;
+        matauang.value = "SAUDI RIYAL";
+        kurspilih.value = kurssar.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "aud") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursaud.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "A$ " + Math.round(Pasangger.value * 513500 / kursaud.value);
+        convert.value = formatkonversi;
+        matauang.value = "AUSTRALIAN DOLLAR";
+        kurspilih.value = kursaud.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "thb") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursthb.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+         const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "฿ " + Math.round(Pasangger.value * 513500 / kursthb.value);
+        convert.value = formatkonversi;
+        matauang.value = "THAILAND BATH";
+        kurspilih.value = kursthb.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+    
+      else if (kursSelect.value == "myr") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursmyr.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "RM " + Math.round(Pasangger.value * 513500 / kursmyr.value);
+        convert.value = formatkonversi;
+        matauang.value = "MALAYSIAN RINGGIT";
+        kurspilih.value = kursmyr.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "cny") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurscny.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "CN¥ " + Math.round(Pasangger.value * 513500 / kurscny.value);
+        convert.value = formatkonversi;
+        matauang.value = "CHINESE YUAN";
+        kurspilih.value = kurscny.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "idr") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursidr.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(Payment.value - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+       const changeround = formatRp(konversinumber -harganumber - pembulatan);
+  
+        
+        harga.value = formatharga;
+        hargavalas.value = "-";
+        matauang.value = "INDONESIA RUPIAH";
+        convert.value = " ";
+        kurspilih.value = kursidr.value;
+        bulat.value= pembulatan;
+        
+        
+       if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+      });
+
+    Payment.addEventListener("keyup", function() {
+           if (kursSelect.value == "usd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursusd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "$ " + Math.round(Pasangger.value * 513500 / kursusd.value);
+        convert.value = formatkonversi;
+        matauang.value = "US DOLLAR";
+        kurspilih.value = kursusd.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+      }
+
+      else if (kursSelect.value == "sgd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurssgd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "S$ " + Math.round(Pasangger.value * 513500 / kurssgd.value);
+        convert.value = formatkonversi;
+        matauang.value = "SINGAPORE DOLLAR";
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "hkd") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurshkd.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "HK$ " + Math.round(Pasangger.value * 513500 / kurshkd.value);
+        convert.value = formatkonversi;
+        matauang.value = "HONGKONG DOLLAR";
+        kurspilih.value = kurshkd.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "eur") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurseur.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+            const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "€ " + Math.round(Pasangger.value * 513500 / kurseur.value);
+        convert.value = formatkonversi;
+        matauang.value = "EURO";
+        kurspilih.value = kurseur.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "jpy") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursjpy.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "¥ " + Math.round(Pasangger.value * 513500 / kursjpy.value);
+        convert.value = formatkonversi;
+        matauang.value = "JAPANESE YEN";
+        kurspilih.value = kursjpy.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "gbp") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursgbp.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "£ " + Math.round(Pasangger.value * 513500 / kursgbp.value);
+        convert.value = formatkonversi;
+        matauang.value = "POUNDSTERLING";
+        kurspilih.value = kursgbp.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "sar") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurssar.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "﷼ " + Math.round(Pasangger.value * 513500 / kurssar.value);
+        convert.value = formatkonversi;
+        matauang.value = "SAUDI RIYAL";
+        kurspilih.value = kurssar.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "aud") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursaud.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+ const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "A$ " + Math.round(Pasangger.value * 513500 / kursaud.value);
+        convert.value = formatkonversi;
+        matauang.value = "AUSTRALIAN DOLLAR";
+        kurspilih.value = kursaud.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+      else if (kursSelect.value == "thb") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursthb.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+         const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "฿ " + Math.round(Pasangger.value * 513500 / kursthb.value);
+        convert.value = formatkonversi;
+        matauang.value = "THAILAND BATH";
+        kurspilih.value = kursthb.value;
+        bulat.value= pembulatan;
+        
+        
+      if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+    
+      else if (kursSelect.value == "myr") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursmyr.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "RM " + Math.round(Pasangger.value * 513500 / kursmyr.value);
+        convert.value = formatkonversi;
+        matauang.value = "MALAYSIAN RINGGIT";
+        kurspilih.value = kursmyr.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+
+       else if (kursSelect.value == "cny") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kurscny.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(konversinumber - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+      const changeround = formatRp(konversinumber -harganumber - pembulatan);
+
+        harga.value = formatharga;
+        hargavalas.value = "CN¥ " + Math.round(Pasangger.value * 513500 / kurscny.value);
+        convert.value = formatkonversi;
+        matauang.value = "CHINESE YUAN";
+        kurspilih.value = kurscny.value;
+        bulat.value= pembulatan;
+        
+        
+     if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+       else if (kursSelect.value == "idr") {
+      const formatharga = formatRp(Pasangger.value * 513500);
+      const formatkonversi = formatRp(Payment.value * kursidr.value);
+      const harganumber = formatharga.replace(/[^0-9]/g, '');
+      const konversinumber = formatkonversi.replace(/[^0-9]/g, '');
+      const formatkembali = formatRp(Payment.value - harganumber);
+      const pembulatan = (konversinumber - harganumber) % 1000;
+      const changefix = formatRp(konversinumber -harganumber - pembulatan + 500);
+       const changeround = formatRp(konversinumber -harganumber - pembulatan);
+  
+        
+        harga.value = formatharga;
+        hargavalas.value = "-";
+        matauang.value = "INDONESIA RUPIAH";
+        convert.value = " ";
+        kurspilih.value = kursidr.value;
+        bulat.value= pembulatan;
+        
+        
+       if(bulat.value > 500){
+           kembalian.value= changefix;
+           bulat.value= pembulatan-500;
+       } else {
+        kembalian.value= changeround;
+       };
+      if(bulat.value < 0){
+           kembalian.value= formatkembali;
+           bulat.value= "";
+       }
+
+      }
+      });
+
+
+  function printReceipt() {
+  // Ambil data dari input
+  const currency = document.getElementById("currency").value;
+  const kurs = document.getElementById("kurspilih").value;
+  const passenger = document.getElementById("floatingInput").value;
+  const price = document.getElementById("harga").value;
+  const pay = document.getElementById("bayar").value;
+  const convert = document.getElementById("convert").value;
+  const change = document.getElementById("change").value;
+  const hargavalas = document.getElementById("hargavalas").value;
+
+  // Buat konten struk
+  const receiptContent = `
+  <div id="receipt" style="width:68mm; font-family: sans-serif; font-size:14px; padding:5px;">
+    <div style="text-align:center;">
+      <h3 style="margin:0;">VISA ON ARRIVAL</h3>
+      <p style="margin:0;">Molina Lite</p>
+      <hr>
+    </div >
+    <p style="text-align:center">Date: ${new Date().toLocaleString('us-ID')}</p>
+    <p style="text-align:center"> Rp. 513.500/Person </p>
+     <table style="width:100%; font-size:12px;">
+      <tr>
+        <td style="width:100px">Currency</td>
+        <td>:</td>
+        <td style="text-align:right;">${currency}</td>
+      </tr>
+      <tr>
+        <td>Exchange Rate</td>
+        <td>:</td>
+        <td style="text-align:right;">${kurs}</td>
+      </tr>
+      <tr>
+        <td>Passengers</td>
+        <td>:</td>
+        <td style="text-align:right;">${passenger} Person</td>
+      </tr>
+      </table>
+    
+  <br>
+    <hr>
+    <table style="width:100%; font-size:12px;">
+      <tr>
+        <td style="width:100px">Price</td>
+        <td >:</td>
+        <td style="text-align:right;">${price}</td>
+      </tr>
+      <tr>
+        <td style="font-size:10px">${currency}</td>
+        <td >:</td>
+        <td style="text-align:right;">${hargavalas}</td>
+      </tr>
+      <tr>
+        <td style="height : 14px" ></td>
+        <td></td>
+        <td ></td>
+      </tr>
+      
+      <tr>
+        <td>Payment</td>
+        <td>:</td>
+        <td style="text-align:right;">${pay}</td>
+      </tr>
+      <tr>
+        <td>Converted</td>
+        <td>:</td>
+        <td style="text-align:right;">${convert}</td>
+      </tr>
+      <tr>
+        <td>Change</td>
+        <td>:</td>
+        <td style="text-align:right;">${change}</td>
+      </tr>
+    </table>
+    <hr>
+    <div style="text-align:center;">
+      <p>Thank you!</p>
+      <p>Have a nice day</p>
+    </div>
+  </div>
+  `;
+
+  // Buka jendela baru untuk print
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          @page {
+            size: 58mm auto;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: monospace;
+          }
+          #receipt {
+            width: 58mm;
+            padding: 5px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          td {
+            padding: 2px 0;
+          }
+          hr {
+            border: 0;
+            border-top: 1px dashed #000;
+          }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">
+        ${receiptContent}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+</script>
+
+</body>
+</html>
