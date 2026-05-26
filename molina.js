@@ -1,18 +1,4 @@
-   const semuaKurs = [
-  "kursusd","kurssgd","kurshkd","kurseur","kursjpy",
-  "kursgbp","kurssar","kursaud","kursthb","kursmyr",
-  "kurscny","kursidr"
-];
-
-semuaKurs.forEach(id => {
-  const input = document.getElementById(id);
-
-  if (input) {
-    input.addEventListener("input", () => {
-      localStorage.setItem(id, input.value);
-    });
-  }
-});
+   
         
     const kursSelect = document.querySelector(".Kurs");
     const hargavalas = document.getElementById("hargavalas");
@@ -1299,19 +1285,3 @@ lightIcon.onclick = themeSwitch;
 darkIcon.onclick  = themeSwitch;
 
 themeCheck();
-
-window.addEventListener("DOMContentLoaded", () => {
-  semuaKurs.forEach(id => {
-    const saved = localStorage.getItem(id);
-
-    if (saved !== null) {
-      const el = document.getElementById(id);
-      if (el) el.value = saved;
-    }
-  });
-
-  // penting: refresh hitungan
-  if (typeof hitung === "function") {
-    hitung();
-  }
-});
