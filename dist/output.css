@@ -1928,6 +1928,13 @@ video {
   left: auto;
 }
 
+.bg-pink{
+  background-color: #be3e82;
+}
+
+.bg-pink:hover{
+  background-color:#f90093;
+}
 .peer:focus ~ .rtl\:peer-focus\:translate-x-1\/4:where([dir="rtl"], [dir="rtl"] *){
   --tw-translate-x: 25%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
