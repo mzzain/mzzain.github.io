@@ -1523,6 +1523,10 @@ video {
   background-color: sky-900;
 }
 
+.hover\:bg-\[red-600\]:hover{
+  background-color: red-900;
+}
+
 .hover\:bg-\[\#061a40\]:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(6 26 64 / var(--tw-bg-opacity, 1));
