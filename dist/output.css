@@ -1929,11 +1929,11 @@ video {
 }
 
 .bg-pink{
-  background-color: #be3e82;
+  background-color: #f90093;
 }
 
 .bg-pink:hover{
-  background-color:#f90093;
+  background-color: #5f0f40;
 }
 .peer:focus ~ .rtl\:peer-focus\:translate-x-1\/4:where([dir="rtl"], [dir="rtl"] *){
   --tw-translate-x: 25%;
