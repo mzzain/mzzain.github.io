@@ -1940,3 +1940,11 @@ video {
 .bg-pink:hover{
   background-color: #f77f00;
 }
+
+.bg-orange{
+  background-color: #f77f00;
+}
+
+.bg-orange:hover{
+  background-color: #f90093;
+}
